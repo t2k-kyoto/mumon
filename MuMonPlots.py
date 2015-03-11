@@ -56,9 +56,10 @@ def MakePlots(mode,tchain,start_time,end_time):
     hist_ic_y_width = TH2F('hist_ic_y_width','ic_y_width;Date-time;IC y width (cm)',400,start,end,400,121,130)
     #Horn currents
     #nu mode ranges
-    hist_hc1 = TH2F('hist_hc1','hc1;Date-time;Horn 1 Current (kA)',400,start,end,300,248.,252.)
-    hist_hc2 = TH2F('hist_hc2','hc2;Date-time;Horn 2 Current (kA)',400,start,end,300,248.,252.)
-    hist_hc3 = TH2F('hist_hc3','hc3;Date-time;Horn 3 Current (kA)',400,start,end,300,248.,252.)
+    hist_hc1 = TH2F('hist_hc1','hc1;Date-time;Horn 1 Current (kA)',400,start,end,300,246.,258.)
+    hist_hc2 = TH2F('hist_hc2','hc2;Date-time;Horn 2 Current (kA)',400,start,end,300,246.,258.)
+    hist_hc3 = TH2F('hist_hc3','hc3;Date-time;Horn 3 Current (kA)',400,start,end,300,246.,258.)
+    hist_hc1_hc23 = TH2F('hist_hc1_hc23','hc1 Vs hc23;Horn 1 Current (kA);Avg. Horn 2,3 Current (kA)',300,240.,260.,300,240.,260.)
     #Yeilds
     #nu mode ranges
     hist_sich_ct5np = TH2F('hist_sich_ct5np','sich_ct5np;Date-time;Si charge/POT charge',400,start,end,300,198,205)
@@ -146,7 +147,7 @@ def MakePlots(mode,tchain,start_time,end_time):
   for i in xrange(n_entries):
     tchain.GetEvent(i)
 #anti-nu runs in MR Run58
-    if tchain.spillnum < 1830240:
+    if tchain.midas_event < 4051:
 # Cuts already included in qsd files
 #    if tchain.run_type == 1:
 #      if thain.trigger_flag == 2:
@@ -199,6 +200,7 @@ def MakePlots(mode,tchain,start_time,end_time):
       hist_hc1.Fill(time,hc1)
       hist_hc2.Fill(time,hc2)
       hist_hc3.Fill(time,hc3)
+      hist_hc1_hc23.Fill(hc1,(hc2+hc3)/2)
       hist_si_x_centre.Fill(time,si_x_centre)
       hist_si_y_centre.Fill(time,si_y_centre)
       hist_ic_x_centre.Fill(time,ic_x_centre)
@@ -223,7 +225,7 @@ def MakePlots(mode,tchain,start_time,end_time):
       hist_ic_x_centre,hist_ic_y_centre,\
       hist_si_x_width,hist_si_y_width,\
       hist_ic_x_width,hist_ic_y_width,\
-      hist_hc1,hist_hc2,hist_hc3,\
+      hist_hc1,hist_hc2,hist_hc3,hist_hc1_hc23,\
       hist_sich_ct5np,hist_icch_ct5np,\
       hist_si_hc1,hist_si_hc2,hist_si_hc3,hist_ic_hc1,hist_ic_hc2,hist_ic_hc3,\
       hist_sich_ct5np_hcc,hist_icch_ct5np_hcc\
@@ -261,25 +263,26 @@ def DrawPlots(hist_list,start,end):
 ###MAIN
 if __name__ == "__main__":
   #Choose mode: 'nu','antinu','off'
-  mode = 'antinu'
+  mode = 'nu'
   #Choose the input data to be used 
   #e.g. run060 means all MR run 60 data
   #nu run 550089 & spillnum < 179990 for neutrino mode correction
   #and run 550116 & spillnum < 1830240 for anti-neutrino mode correction
   #run 550111 is horn off data
-  bsd_dir = "/home/beam_summary/beam_summary/qsd/p06/t2krun5/"
-  bsd_files = glob.glob(bsd_dir+"bsd_run0550116*root")
+  #run 610015 (there are large regions with dummy triggers in the middle)
+  bsd_dir = "/home/beam_summary/beam_summary/qsd/p06/t2krun6/"
+  bsd_files = glob.glob(bsd_dir+"bsd_run0610015*root")
   bsd_tree_name = 'bsd'
-  bsd_dir = "/home/beam_summary/beam_summary/bsd/v01/t2krun6/"
-  bsd_files = glob.glob(bsd_dir+"bsd_run058*.root") + glob.glob(bsd_dir+"bsd_run059*.root")
-  bsd_tree_name = 'bsd'
+  #bsd_dir = "/home/beam_summary/beam_summary/bsd/v01/t2krun6/"
+  #bsd_files = glob.glob(bsd_dir+"bsd_run058*.root") + glob.glob(bsd_dir+"bsd_run059*.root")
+  #bsd_tree_name = 'bsd'
   
   #Choose the time and date range in JST (yyyy,mm,dd,hh,mm,ss)
-  start_time = TDatime(2014,11,04,10,00,00)
-  end_time = TDatime(2014,12,22,20,00,00)
+  start_time = TDatime(2015,02,25,16,00,00)
+  end_time = TDatime(2015,02,25,22,00,00)
 
   #Choose the output rootfile name
-  output_filename = 'corr_t2k_collab_meeting.root'
+  output_filename = 'new_horn_scans_positive.root'
 
   #Get original data TChain
   bsd_tree = DataTChain(bsd_files,bsd_tree_name)
